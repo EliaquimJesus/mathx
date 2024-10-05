@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class MainController extends Controller
 {
     //
-    public function home(): void
+    public function home(): View
     {
-        echo 'apresentar página inicial';
+        return view('home');
     }
 
     public function generateExercises(Request $request): void
