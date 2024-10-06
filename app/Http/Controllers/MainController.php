@@ -56,33 +56,55 @@ class MainController extends Controller
         return view('operations', ['exercises' => $exercises]);
     }
 
-    public function printExercises()
+    public function printExercises(): mixed
     {
-        // check if exercises are in session
-        if(!session()->has('exercises')) return redirect()->route('home');
+        // get exercises
+        $exercises = $this->getSessionExercises();
 
-        $exercises = session('exercises');
+        $text = '';
 
         //echo '<pre>';
-        echo '<h1>Exercícios de Matemática (' . env('APP_NAME') .  ')</h1>';
-        echo '<hr>';
+        $text = '<h1>Exercícios de Matemática (' . env('APP_NAME') .  ')</h1>';
+        $text .= '<hr>';
 
         foreach($exercises as $exercise){
-            echo '<h2><small>' . str_pad((string) $exercise['exercise_number'], 2, "0", STR_PAD_LEFT)  . ' » </small>'. $exercise['exercise']  .' </h2>';
+            $text .= '<h2><small>' . $exercise['exercise_number']  . ' » </small>'. $exercise['exercise']  .' </h2>';
         }
 
         // solutions
-        echo '<hr>';
-        echo '<small>Soluções</small><br>';
+        $text .= '<hr>';
+        $text .= '<small>Soluções</small><br>';
         foreach($exercises as $exercise)
         {
-            echo '<small>'. str_pad((string) $exercise['exercise_number'], 2, "0", STR_PAD_LEFT)  . ' » '. $exercise['solution'] . '</small><br>';
+            $text .= '<small>'. $exercise['exercise_number'] . ' » '. $exercise['solution'] . '</small><br>';
         }
+
+        return $text;
     }
 
-    public function exportExercises(): void
+    public function exportExercises(): mixed
     {
-        echo 'exportar exercícios para um arquivo de texto';
+         // get exercises
+         $exercises = $this->getSessionExercises();
+
+         // create file to download with exercises
+         $filename = 'exercises_' . env('APP_NAME') . '_' . date('YmdHis') . '.txt';
+
+         $content = 'Exercícios de Matemática ('. env('APP_NAME') .')' . "\n\n";
+         foreach($exercises as $exercise){
+            $content .= $exercise['exercise_number'] . ' > ' . $exercise['exercise'] . "\n";
+         }
+
+         // solutions
+         $content .= "\n";
+         $content .= "Soluções\n" . str_repeat('-', 20) . "\n";
+         foreach($exercises as $exercise) {
+            $content .= $exercise['exercise_number'] . ' > ' . $exercise['solution'] . "\n";
+         }
+
+         return response($content)
+                ->header('Content-Type', 'text/plain')
+                ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 
     private function generateExercise(int $index, array $operations, int $min, int $max): array
@@ -119,9 +141,19 @@ class MainController extends Controller
 
             return [
                 'operation' => $operation,
-                'exercise_number' => $index,
+                'exercise_number' => str_pad((string) $index, 2, "0", STR_PAD_LEFT),
                 'exercise' => $exercise,
                 'solution' => "$exercise $solution",
             ];
+    }
+
+    private function getSessionExercises(): array
+    {
+        // check if exercises are in session
+        if(!session()->has('exercises')) return redirect()->route('home');
+
+        $exercises = session('exercises');
+
+        return $exercises;
     }
 }
