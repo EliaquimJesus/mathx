@@ -27,18 +27,14 @@
 
         <div class="row">
 
-            @if(!empty($exercises))
             <!-- each operation -->
             @foreach($exercises as $exercise)
             <div class="col-3 display-6 mb-3">
-                <span class="badge bg-dark">{{ $exercise['exercise_number'] }}</span>
-                <span>000</span>
-                <span>{{ $exercise['operation'] }}</span>
-                <span>000</span>
+                <span class="badge bg-dark">{{ str_pad($exercise['exercise_number'], 2, 0, STR_PAD_LEFT) }}</span>
+                <span>{{ $exercise['exercise'] }}</span>
+                <!-- <span>{{ $exercise['solution'] }}</span> -->
             </div>
             @endforeach
-
-            @endif
 
         </div>
 
@@ -50,11 +46,11 @@
     <div class="container mt-5">
         <div class="row">
             <div class="col">
-                <a href="#" class="btn btn-primary px-5">VOLTAR</a>
+                <a href="{{ route('home') }}" class="btn btn-primary px-5">VOLTAR</a>
             </div>
             <div class="col text-end">
-                <a href="#" class="btn btn-secondary px-5">DESCARREGAR EXERCÍCIOS</a>
-                <a href="#" class="btn btn-secondary px-5">IMPRIMIR EXERCÍCIOS</a>
+                <a href="{{ route('exportExercises') }}" class="btn btn-secondary px-5">DESCARREGAR EXERCÍCIOS</a>
+                <a href="{{ route('printExercises') }}" class="btn btn-secondary px-5">IMPRIMIR EXERCÍCIOS</a>
             </div>
         </div>
     </div>
