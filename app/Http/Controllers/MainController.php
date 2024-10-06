@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -34,8 +36,8 @@ class MainController extends Controller
         if($request->check_division) { $operations[] = 'division'; }
        
         //get numbers (min and max)
-        $min = $request->number_one;
-        $max = $request->number_two;
+        $min = (int) $request->number_one;
+        $max = (int) $request->number_two;
 
         // get number of exercises
         $numberExercises = $request->number_exercises;
@@ -45,7 +47,28 @@ class MainController extends Controller
 
         for($index = 1; $index <= $numberExercises; $index++)
         {
-            $operation = $operations[array_rand($operations)];
+            $exercises[] = $this->generateExercise($index, $operations, $min, $max);
+        }
+        
+        // place exercises in session
+        session(['exercises' => $exercises]);
+
+        return view('operations', ['exercises' => $exercises]);
+    }
+
+    public function printExercises(): void
+    {
+        echo 'imprimir exercícios no navegador';
+    }
+
+    public function exportExercises(): void
+    {
+        echo 'exportar exercícios para um arquivo de texto';
+    }
+
+    private function generateExercise(int $index, array $operations, int $min, int $max): array
+    {
+        $operation = $operations[array_rand($operations)];
             $number1 = rand($min, $max);
             $number2 = rand($min, $max);
 
@@ -75,25 +98,11 @@ class MainController extends Controller
             // if solution is a float, round it to 2 decimal places
             is_float($solution) ? $solution = round($solution, 2) : $solution;
 
-            $exercises[] = [
+            return [
                 'operation' => $operation,
                 'exercise_number' => $index,
                 'exercise' => $exercise,
                 'solution' => "$exercise $solution",
             ];
-        }
-
-        return view('operations', ['exercises' => $exercises]);
-
-    }
-
-    public function printExercises(): void
-    {
-        echo 'imprimir exercícios no navegador';
-    }
-
-    public function exportExercises(): void
-    {
-        echo 'exportar exercícios para um arquivo de texto';
     }
 }
